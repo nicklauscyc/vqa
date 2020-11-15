@@ -1,2 +1,2 @@
-# vqa
+# VQA
 Visual question and answer 
