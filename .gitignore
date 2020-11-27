@@ -1,0 +1,6 @@
+# ignoring huge data set folders #
+##################################
+test/*
+train/*
+val/*
+
