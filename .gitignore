@@ -3,4 +3,6 @@
 test/*
 train/*
 val/*
+compressed-data/*
+
 
