@@ -6,7 +6,11 @@ def fun1(x):
 def fun2(x):
     print(True)
 
+def fun3(x):
+    print("hello world")
+
 if __name__ == "__main__":
     print('hello from main')
     fun1('hoho')
     fun2(2)
+    fun3("hi")
