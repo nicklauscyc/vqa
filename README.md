@@ -14,6 +14,11 @@ source activate-python-venv.sh
 ```
 win-venv\Scripts\Activate.ps1
 ```
+If the above does not work in VSCode's powershell, first run this command, then re-run
+the above command:
+```
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
 
 ## Data Set
 Data used for training can be found [here](https://vizwiz.org/tasks-and-datasets/vqa/). 
