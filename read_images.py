@@ -13,3 +13,5 @@ for filename in os.listdir(path):
     img = Image.open(full_path)
     size = img.size 
     sizes.append(size)
+
+msg = "hello"
