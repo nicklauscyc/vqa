@@ -1,0 +1,3 @@
+#!/home/nicklaus/CMU/701-project/vqa/venv/bin/python3
+from numba.pycc import main
+main()

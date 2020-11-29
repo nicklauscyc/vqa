@@ -1,0 +1,3 @@
+[submodule "seam-carving"]
+	path = seam-carving
+	url = https://github.com/andrewdcampbell/seam-carving.git
