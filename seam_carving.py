@@ -9,6 +9,10 @@
 # python seam_carving.py -remove -im demos/eiffel.jpg -out eiffel_remove.jpg
 #        -rmask demos/eiffel_mask.jpg -vis
 
+# Nick changes:
+# removed the jit parts since those throw errors when run with numba, and will
+# add overhead to the running of the function itself
+#
 import numpy as np
 import cv2
 import argparse
@@ -178,7 +182,7 @@ def get_minimum_seam(im, mask=None, remove_mask=None):
     h, w = im.shape[:2]
 
     #energyfn = forward_energy
-    energyfn = forward-energy if USE_FORWARD_ENERGY else backward_energy
+    energyfn = forward_energy if USE_FORWARD_ENERGY else backward_energy
     M = energyfn(im)
 
     if mask is not None:

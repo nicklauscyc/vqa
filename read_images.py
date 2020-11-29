@@ -3,6 +3,8 @@
 import os
 import seam_carving
 
+import time
+
 import numpy as np
 import cv2
 import argparse
@@ -28,8 +30,14 @@ def processImages(width, imgDir, outputDir):
     '''
     assert outputDir is not None and imgDir is not None
 
-    count = 1
-    for filename in os.listdir(imgDir):
+    count = 0
+    start = time.time()
+    prev = time.time()
+
+    allImg = sorted(os.listdir(imgDir))
+    for filename in allImg:
+        if filename in os.listdir(outputDir):
+            continue
         # read the image
         full_path = imgDir + filename
         im = cv2.imread(full_path)
@@ -49,7 +57,6 @@ def processImages(width, imgDir, outputDir):
 
         # TODO this makes no sense
         if h > w:
-            print('height greater than width')
             dy = 0
             dx = w - h
         else:
@@ -58,12 +65,19 @@ def processImages(width, imgDir, outputDir):
         assert dy != None and dx != None
 
         # for now we assume the mask is None
-        print('processing image ', full_path, ' ...')
-        print (h, w, dy, dx)
-        output = seam_carving.seam_carve(im, dx, dy, mask=None,vis=True)
+        print('   processing image', full_path, '...')
+        output = seam_carving.seam_carve(im, dx, dy, mask=None,vis=False)
         cv2.imwrite(outputDir + filename, output)
-        if count == 1:
-            break
+
+        # print out progress
+        count += 1
+        now = time.time()
+        print('   processed image', full_path, 'in', int(now-prev), 's')
+        prev = now
+
+        print('-- time elapse:', int(prev-start), 's, processed:', count,
+              'average time:', int((prev-start)/count), 's')
+
 
 if __name__ == '__main__':
 
