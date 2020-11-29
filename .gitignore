@@ -5,4 +5,7 @@ train/*
 val/*
 compressed-data/*
 
+# ignore pycacache
+*__pycache__*
+
 
