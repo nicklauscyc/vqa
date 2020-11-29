@@ -3,7 +3,7 @@
 import json
 
 def readData(f='train.json',printQuestion=False):
-    rawFile = open('Annotations/'+f)
+    rawFile = open('annotations/'+f)
     data = json.load(rawFile)
 
     for elem in data:
