@@ -4,8 +4,10 @@ test/*
 train/*
 val/*
 compressed-data/*
+data/*
 
 # ignore pycacache
 *__pycache__*
+
 
 
