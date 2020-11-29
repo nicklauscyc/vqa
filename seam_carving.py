@@ -1,10 +1,12 @@
+#!/venv/bin/python3
+
 # USAGE:
 # python seam_carving.py (-resize | -remove) -im IM -out OUT [-mask MASK]
 #                        [-rmask RMASK] [-dy DY] [-dx DX] [-vis] [-hremove] [-backward_energy]
 # Examples:
-# python seam_carving.py -resize -im demos/ratatouille.jpg -out ratatouille_resize.jpg 
+# python seam_carving.py -resize -im demos/ratatouille.jpg -out ratatouille_resize.jpg
 #        -mask demos/ratatouille_mask.jpg -dy 20 -dx -200 -vis
-# python seam_carving.py -remove -im demos/eiffel.jpg -out eiffel_remove.jpg 
+# python seam_carving.py -remove -im demos/eiffel.jpg -out eiffel_remove.jpg
 #        -rmask demos/eiffel_mask.jpg -vis
 
 import numpy as np
@@ -42,7 +44,7 @@ def resize(image, width):
 
 def rotate_image(image, clockwise):
     k = 1 if clockwise else 3
-    return np.rot90(image, k)    
+    return np.rot90(image, k)
 
 ########################################
 # ENERGY FUNCTIONS
@@ -54,7 +56,7 @@ def backward_energy(im):
     """
     xgrad = ndi.convolve1d(im, np.array([1, 0, -1]), axis=1, mode='wrap')
     ygrad = ndi.convolve1d(im, np.array([1, 0, -1]), axis=0, mode='wrap')
-    
+
     grad_mag = np.sqrt(np.sum(xgrad**2, axis=2) + np.sum(ygrad**2, axis=2))
 
     # vis = visualize(grad_mag)
@@ -76,20 +78,20 @@ def forward_energy(im):
 
     energy = np.zeros((h, w))
     m = np.zeros((h, w))
-    
+
     U = np.roll(im, 1, axis=0)
     L = np.roll(im, 1, axis=1)
     R = np.roll(im, -1, axis=1)
-    
+
     cU = np.abs(R - L)
     cL = np.abs(U - L) + cU
     cR = np.abs(U - R) + cU
-    
+
     for i in range(1, h):
         mU = m[i-1]
         mL = np.roll(mU, 1)
         mR = np.roll(mU, -1)
-        
+
         mULR = np.array([mU, mL, mR])
         cULR = np.array([cU[i], cL[i], cR[i]])
         mULR += cULR
@@ -97,20 +99,20 @@ def forward_energy(im):
         argmins = np.argmin(mULR, axis=0)
         m[i] = np.choose(argmins, mULR)
         energy[i] = np.choose(argmins, cULR)
-    
+
     # vis = visualize(energy)
-    # cv2.imwrite("forward_energy_demo.jpg", vis)     
-        
+    # cv2.imwrite("forward_energy_demo.jpg", vis)
+
     return energy
 
 ########################################
 # SEAM HELPER FUNCTIONS
-######################################## 
+########################################
 
 @jit
 def add_seam(im, seam_idx):
     """
-    Add a vertical seam to a 3-channel color image at the indices provided 
+    Add a vertical seam to a 3-channel color image at the indices provided
     by averaging the pixels values to the left and right of the seam.
 
     Code adapted from https://github.com/vivianhylee/seam-carving.
@@ -136,9 +138,9 @@ def add_seam(im, seam_idx):
 @jit
 def add_seam_grayscale(im, seam_idx):
     """
-    Add a vertical seam to a grayscale image at the indices provided 
+    Add a vertical seam to a grayscale image at the indices provided
     by averaging the pixels values to the left and right of the seam.
-    """    
+    """
     h, w = im.shape[:2]
     output = np.zeros((h, w + 1))
     for row in range(h):
@@ -170,7 +172,7 @@ def remove_seam_grayscale(im, boolmask):
 @jit
 def get_minimum_seam(im, mask=None, remove_mask=None):
     """
-    DP algorithm for finding the seam of minimum energy. Code adapted from 
+    DP algorithm for finding the seam of minimum energy. Code adapted from
     https://karthikkaranth.me/blog/implementing-seam-carving-with-python/
     """
     h, w = im.shape[:2]
@@ -214,7 +216,7 @@ def get_minimum_seam(im, mask=None, remove_mask=None):
 
 ########################################
 # MAIN ALGORITHM
-######################################## 
+########################################
 
 def seams_removal(im, num_remove, mask=None, vis=False, rot=False):
     for _ in range(num_remove):
@@ -254,7 +256,7 @@ def seams_insertion(im, num_add, mask=None, vis=False, rot=False):
 
         # update the remaining seam indices
         for remaining_seam in seams_record:
-            remaining_seam[np.where(remaining_seam >= seam)] += 2         
+            remaining_seam[np.where(remaining_seam >= seam)] += 2
 
     return im, mask
 
@@ -313,7 +315,7 @@ def object_removal(im, rmask, mask=None, vis=False, horizontal_removal=False):
     while len(np.where(rmask > MASK_THRESHOLD)[0]) > 0:
         seam_idx, boolmask = get_minimum_seam(output, mask, rmask)
         if vis:
-            visualize(output, boolmask, rotate=horizontal_removal)            
+            visualize(output, boolmask, rotate=horizontal_removal)
         output = remove_seam(output, boolmask)
         rmask = remove_seam_grayscale(rmask, boolmask)
         if mask is not None:
@@ -324,7 +326,7 @@ def object_removal(im, rmask, mask=None, vis=False, horizontal_removal=False):
     if horizontal_removal:
         output = rotate_image(output, False)
 
-    return output        
+    return output
 
 
 if __name__ == '__main__':
