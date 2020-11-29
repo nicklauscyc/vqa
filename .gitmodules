@@ -1,3 +1,6 @@
 [submodule "seam-carving"]
 	path = seam-carving
 	url = https://github.com/andrewdcampbell/seam-carving.git
+[submodule "open-source-repositories/vqa.pytorch"]
+	path = open-source-repositories/vqa.pytorch
+	url = https://github.com/Cadene/vqa.pytorch.git
