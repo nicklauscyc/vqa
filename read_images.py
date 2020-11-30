@@ -1,5 +1,6 @@
 #!venv/bin/python3
 
+from multiprocessing import Pool
 import os
 import seam_carving
 
@@ -15,16 +16,13 @@ path = 'C:/Users/lajja/Documents/Fall2020/ML/vqa/test/test/'
 #train_img_len = len(os.listdir(path))
 
 # for efficiency reasons in seam_carving.py
+IN_DIR = None
+OUT_DIR = None
+WIDTH = None
+USE_SEAM_CARVING = True
+DOWNSIZE_WIDTH = 448
 
-DOWNSIZE_WIDTH = 500
-
-def scanImageSizes(imgDir):
-    '''scans all images in the directory to find the mean size, median
-       size, min size, max size
-    '''
-    return 42
-
-def processImages(width, imgDir, outputDir):
+def processImages(width, imgDir, outputDir, seam_carve=True):
     '''takes in all images in imgDir, and resizes them with seam carving
        to the dimensions width x width, via forward energy.
     '''
@@ -35,6 +33,7 @@ def processImages(width, imgDir, outputDir):
     prev = time.time()
 
     allImg = sorted(os.listdir(imgDir))
+
     for filename in allImg:
         if filename in os.listdir(outputDir):
             continue
@@ -44,7 +43,7 @@ def processImages(width, imgDir, outputDir):
 
         # downsize the image
         im = seam_carving.resize(im, width=DOWNSIZE_WIDTH)
-
+        
         # get image resolution
         h, w = im.shape[:2]
 
@@ -65,18 +64,24 @@ def processImages(width, imgDir, outputDir):
         assert dy != None and dx != None
 
         # for now we assume the mask is None
-        print('   processing image', full_path, '...')
-        output = seam_carving.seam_carve(im, dx, dy, mask=None,vis=False)
+        #print('   processing image', full_path, '...')
+
+        if USE_SEAM_CARVING :
+            output = seam_carving.seam_carve(im, dx, dy, mask=None,vis=False)
+        else:
+            output = cv2.resize(im, (WIDTH, WIDTH), interpolation=cv2.INTER_AREA)
+
         cv2.imwrite(outputDir + filename, output)
 
         # print out progress
         count += 1
         now = time.time()
-        print('   processed image', full_path, 'in', int(now-prev), 's')
+        if count % 50 == 0:
+            print('   processed image', full_path, 'in', int(now-prev), 's')
+           
+            print('-- time elapse:', int(prev-start), 's, processed:', count,
+                'average time:', int((prev-start)/count), 's', int(count/len(allImg))*100, 'percent complete')
         prev = now
-
-        print('-- time elapse:', int(prev-start), 's, processed:', count,
-              'average time:', int((prev-start)/count), 's')
 
 
 if __name__ == '__main__':
@@ -86,10 +91,18 @@ if __name__ == '__main__':
     ap.add_argument("-in", help="Path to Directory of raw images", required=True)
     ap.add_argument("-out", help="Path to Directory of output images", required=True)
     ap.add_argument("-w", help="Width of square image output", required=True)
+    ap.add_argument("-s", help="Use seam carving to resize images if set to true, normal resizing otherwise", action="store_true")
     args = vars(ap.parse_args())
 
-    INPUT_DIR, OUTPUT_DIR, WIDTH = args['in'], args['out'], int(args['w'])
-    processImages(WIDTH, INPUT_DIR, OUTPUT_DIR)
+    USE_SEAM_CARVING = ap.parse_args().s
+    IN_DIR, OUT_DIR, WIDTH,  = args['in'], args['out'], int(args['w'])
+
+    if USE_SEAM_CARVING:
+        processImages(WIDTH, IN_DIR, OUT_DIR)
+    else:
+        processImages(WIDTH, IN_DIR, OUT_DIR, seam_carve=False)
+        
+
 
 
 
