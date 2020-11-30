@@ -2,10 +2,17 @@
 ##################################
 test/*
 train/*
-processed-train/*
 val/*
+processed-test/*
+processed-train/*
+processed-val/*
+
+seam-carve-train/*
+
+other-data/*
 compressed-data/*
 data/*
+
 
 # ignore pycacache
 *.pyc
