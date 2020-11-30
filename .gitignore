@@ -7,7 +7,7 @@ compressed-data/*
 data/*
 
 # ignore pycacache
-*__pycache__*
+*.pyc
 
 
 
