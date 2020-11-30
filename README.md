@@ -3,7 +3,11 @@ Visual question and answer
 
 ## Quick Start Notes
 The instructions below detail how to activate the python 3 virtual environment
-to ensure you have the correct dependencies
+to ensure you have the correct dependencies. Virtual environments will run python dependencies
+from the directories `venv` if on Mac or Linux, and `win-venv` if on Windows. Alternatively, you could
+also install the required dependencies locally and run without a virtual environment (not recommended since some dependencies are
+fairly large)
+
 ### On Linux and Mac
 ```
 source activate-python-venv.sh
@@ -17,6 +21,11 @@ At the bottom left of your opened VSCode screen there should be a blue bar, clic
 
 Then, select the virtual environment 'win-venv' from the drop-down menu at the top of your screen \
 ![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/popup-env.png) 
+
+To run python scripts, for example `<my-script-name>.py` simply ensure that you are not in `bash`, and run
+```
+python <my-script-name>.py
+```
 
 ## Data Set
 Data used for training can be found [here](https://vizwiz.org/tasks-and-datasets/vqa/).
