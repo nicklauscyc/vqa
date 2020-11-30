@@ -9,6 +9,10 @@
 # python seam_carving.py -remove -im demos/eiffel.jpg -out eiffel_remove.jpg
 #        -rmask demos/eiffel_mask.jpg -vis
 
+# Nick changes:
+# removed the jit parts since those throw errors when run with numba, and will
+# add overhead to the running of the function itself
+#
 import numpy as np
 import cv2
 import argparse
@@ -64,7 +68,7 @@ def backward_energy(im):
 
     return grad_mag
 
-@jit
+#@jit
 def forward_energy(im):
     """
     Forward energy algorithm as described in "Improved Seam Carving for Video Retargeting"
@@ -109,7 +113,7 @@ def forward_energy(im):
 # SEAM HELPER FUNCTIONS
 ########################################
 
-@jit
+#@jit
 def add_seam(im, seam_idx):
     """
     Add a vertical seam to a 3-channel color image at the indices provided
@@ -135,7 +139,7 @@ def add_seam(im, seam_idx):
 
     return output
 
-@jit
+#@jit
 def add_seam_grayscale(im, seam_idx):
     """
     Add a vertical seam to a grayscale image at the indices provided
@@ -158,24 +162,26 @@ def add_seam_grayscale(im, seam_idx):
 
     return output
 
-@jit
+#@jit
 def remove_seam(im, boolmask):
     h, w = im.shape[:2]
     boolmask3c = np.stack([boolmask] * 3, axis=2)
     return im[boolmask3c].reshape((h, w - 1, 3))
 
-@jit
+#@jit
 def remove_seam_grayscale(im, boolmask):
     h, w = im.shape[:2]
     return im[boolmask].reshape((h, w - 1))
 
-@jit
+#@jit
 def get_minimum_seam(im, mask=None, remove_mask=None):
     """
     DP algorithm for finding the seam of minimum energy. Code adapted from
     https://karthikkaranth.me/blog/implementing-seam-carving-with-python/
     """
     h, w = im.shape[:2]
+
+    #energyfn = forward_energy
     energyfn = forward_energy if USE_FORWARD_ENERGY else backward_energy
     M = energyfn(im)
 
