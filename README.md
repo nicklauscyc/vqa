@@ -11,15 +11,12 @@ source activate-python-venv.sh
 
 
 ### On Windows
-```
-win-venv\Scripts\Activate.ps1
-```
-If the above does not work in VSCode's powershell, first run this command, then re-run
-the above command:
-```
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-```
-Alternative is to run `bash` in VSCode's terminal and then run the Linux version of commands.
+We recommend you use VSCode to run the scripts via the powershell.
+At the bottom left of your opened VSCode screen there should be a blue bar, click on the environment. \
+![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/bottom-left.png) \
+
+Then, select the virtual environment 'win-venv' from the drop-down menu at the top of your screen \
+![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/popup-env.png) \
 
 ## Data Set
 Data used for training can be found [here](https://vizwiz.org/tasks-and-datasets/vqa/).
