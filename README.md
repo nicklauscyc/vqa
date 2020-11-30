@@ -13,10 +13,10 @@ source activate-python-venv.sh
 ### On Windows
 We recommend you use VSCode to run the scripts via the powershell.
 At the bottom left of your opened VSCode screen there should be a blue bar, click on the environment. \
-![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/bottom-left.png) \
+![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/bottom-left.png) 
 
 Then, select the virtual environment 'win-venv' from the drop-down menu at the top of your screen \
-![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/popup-env.png) \
+![Image of Yaktocat](https://github.com/nicklauscyc/vqa/blob/main/readme-images/popup-env.png) 
 
 ## Data Set
 Data used for training can be found [here](https://vizwiz.org/tasks-and-datasets/vqa/).
