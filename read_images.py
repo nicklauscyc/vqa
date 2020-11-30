@@ -80,7 +80,7 @@ def processImages(width, imgDir, outputDir, seam_carve=True):
             print('   processed image', full_path, 'in', int(now-prev), 's')
            
             print('-- time elapse:', int(prev-start), 's, processed:', count,
-                'average time:', int((prev-start)/count), 's', int(count/len(allImg))*100, 'percent complete')
+                'average time:', int((prev-start)/count), 's', int(count/len(allImg)*100), 'percent complete')
         prev = now
 
 
