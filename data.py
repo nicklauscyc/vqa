@@ -1,8 +1,192 @@
 import os
 import os.path
 from PIL import Image
+import torch
 import torch.utils.data as data
+import torchvision.transforms as transforms
+import config
+import utils
+import json
+import re
 
+#adapted from: https://github.com/Cyanogenoid/pytorch-vqa/blob/master/data.py
+
+# this is used for normalizing questions
+_special_chars = re.compile('[^a-z0-9 ]*')
+
+# these try to emulate the original normalization scheme for answers
+_period_strip = re.compile(r'(?!<=\d)(\.)(?!\d)')
+_comma_strip = re.compile(r'(\d)(,)(\d)')
+_punctuation_chars = re.escape(r';/[]"{}()=+\_-><@`,?!')
+_punctuation = re.compile(r'([{}])'.format(re.escape(_punctuation_chars)))
+_punctuation_with_a_space = re.compile(r'(?<= )([{0}])|([{0}])(?= )'.format(_punctuation_chars))
+
+def prepare_questions(questions_json):
+    #tokenize and normalize questions from given question json
+    questions = [q['question'] for q in questions_json]
+    for question in questions:
+        question = question.lower()[:-1]
+        yield question.split(' ')
+
+def prepare_answers(answers_json):
+    #normalize answers from given answer json
+    answers = [[a['answer'] for a in ans_dict['answers']] for ans_dict in answers_json]
+    def process_punctuation(s):
+        if _punctuation.search(s) is None:
+            return s
+        s = _punctuation_with_a_space.sub('',s)
+        if re.search(_comma_strip, s) is not None:
+            s = s.replace(',', '')
+        s = _punctuation.sub(' ', s)
+        s = _period_strip.sub('', s)
+        return s.strip()
+    for answer_list in answers:
+        yield list(map(process_punctuation, answer_list))
+
+class VQA(data.Dataset):
+    """ VQA dataset, open-ended """
+    def __init__(self, questions_path, answers_path, image_features_path, answerable_only=False):
+        super(VQA, self).__init__()
+        with open(questions_path, 'r') as fd:
+            questions_json = json.load(fd)
+        with open(answers_path, 'r') as fd:
+            answers_json = json.load(fd)
+        with open(config.vocabulary_path, 'r') as fd:
+            vocab_json = json.load(fd)
+        self._check_integrity(questions_json, answers_json)
+
+        # vocab
+        self.vocab = vocab_json
+        self.question_index = self.vocab['question']
+        self.answer_index = self.vocab['answer']
+
+        # q and a
+        self.questions = list(prepare_questions(questions_json))
+        self.answers = list(prepare_answers(answers_json))
+        self.questions = [self._encode_question(q) for q in self.questions]
+        self.answers = [self._encode_answers(a) for a in self.answers]
+
+        # v
+        self.image_features_path = image_features_path
+        self.pic_id_to_index = self._create_pic_id_to_index()
+        self.pic_ids = [q['image_id'] for q in questions_json['questions']]
+
+        # only use questions that have at least one answer?
+        self.answerable_only = answerable_only
+        if self.answerable_only:
+            self.answerable = self._find_answerable()
+    
+    def max_question_length(self):
+    #get max question length
+        if not hasattr(self, '_max_length'):
+            self._max_length = max(map(len, self.questions))
+        return self._max_length
+    
+    def num_tokens(self):
+    #get no. of question 'tokens'
+        return len(self.question_index) + 1  # add 1 for unknown token at index 0
+
+    
+    def _create_pic_id_to_index(self):
+        """ Create a mapping from an image id into the corresponding index into the h5 file """
+        with h5py.File(self.image_features_path, 'r') as features_file:
+            pic_ids = features_file['ids'][()]
+        pic_id_to_index = {id: i for i, id in enumerate(pic_ids)}
+        return pic_id_to_index
+
+    def _check_integrity(self, questions, answers):
+        """ Verify that we are using the correct data """
+        qa_pairs = list(zip(questions['questions'], answers['annotations']))
+        assert all(q['question_id'] == a['question_id'] for q, a in qa_pairs), 'Questions not aligned with answers'
+        assert all(q['image_id'] == a['image_id'] for q, a in qa_pairs), 'Image id of question and answer don\'t match'
+        assert questions['data_type'] == answers['data_type'], 'Mismatched data types'
+        assert questions['data_subtype'] == answers['data_subtype'], 'Mismatched data subtypes'
+
+    def _find_answerable(self):
+        """ Create a list of indices into questions that will have at least one answer that is in the vocab """
+        answerable = []
+        for i, answers in enumerate(self.answers):
+            answer_has_index = len(answers.nonzero()) > 0
+            # store the indices of anything that is answerable
+            if answer_has_index:
+                answerable.append(i)
+        return answerable
+
+
+    def encode_question(self, questions):
+        #converts question into vector of indices and question length
+        #max_length = max(map(len, questions))
+        vec = torch.zeros(self.max_question_length).long()
+        for i, token in enumerate(question):
+            index = self.question_index.get(token, 0)
+            vec[i] = index
+        return vec, len(question)
+
+    def encode_answers(self, answers):
+        #converts answer into vectors
+        vec = torch.zeros(len(self.answer_index))
+        for answer in answers:
+            index = self.answer_index.get(answer)
+            if index is not None:
+                vec[index] += 1
+        return vec
+    
+    def _load_image(self, image_id):
+        """ Load an image """
+        if not hasattr(self, 'features_file'):
+            # Loading the h5 file has to be done here and not in __init__ because when the DataLoader
+            # forks for multiple works, every child would use the same file object and fail
+            # Having multiple readers using different file objects is fine though, so we just init in here.
+            self.features_file = h5py.File(self.image_features_path, 'r')
+        index = self.pic_id_to_index[image_id]
+        dataset = self.features_file['features']
+        img = dataset[index].astype('float32')
+        return torch.from_numpy(img)
+
+    def __getitem__(self, item):
+        if self.answerable_only:
+            # change of indices to only address answerable questions
+            item = self.answerable[item]
+
+        q, q_length = self.questions[item]
+        a = self.answers[item]
+        image_id = self.pic_ids[item]
+        v = self._load_image(image_id)
+        # since batches are re-ordered for PackedSequence's, the original question order is lost
+        # we return `item` so that the order of (v, q, a) triples can be restored if desired
+        # without shuffling in the dataloader, these will be in the order that they appear in the q and a json's.
+        return v, q, a, item, q_length
+
+    def __len__(self):
+        if self.answerable_only:
+            return len(self.answerable)
+        else:
+            return len(self.questions)
+
+
+def get_loader(train=False, val=False, test=False):
+    """ Returns a data loader for the desired split """
+    assert train + val + test == 1, 'need to set exactly one of {train, val, test} to True'
+    split = VQA(
+        utils.path_for(train=train, val=val, test=test, question=True),
+        utils.path_for(train=train, val=val, test=test, answer=True),
+        config.preprocessed_path,
+        answerable_only=train,
+    )
+    loader = torch.utils.data.DataLoader(
+        split,
+        batch_size=config.batch_size,
+        shuffle=train,  # only shuffle the data in training
+        pin_memory=True,
+        num_workers=config.data_workers,
+        collate_fn=collate_fn,
+    )
+    return loader
+
+def collate_fn(batch):
+    # put question lengths in descending order so that we can use packed sequences later
+    batch.sort(key=lambda x: x[-1], reverse=True)
+    return data.dataloader.default_collate(batch)
 
 class VSQImages(data.Dataset):
     def __init__(self, path, transform = None):

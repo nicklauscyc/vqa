@@ -1,22 +1,23 @@
 import json_access 
 from collections import Counter
 import itertools
-from vqa_classes import *
+from data import *
 import random
 import os
 import json
+import config
 
 #adapted from: https://github.com/Cyanogenoid/pytorch-vqa/blob/master/preprocess-vocab.py
 
-split = 'train'
-annFile='Annotations/%s.json'%(split)
-imgDir = 'train'
+#split = 'train'
+#annFile='Annotations/%s.json'%(split)
+#imgDir = 'train'
 
 # initialize VQA api for QA annotations
-vqa=json_access.VQA(annFile)
+#vqa=json_access.VQA(annFile)
 
-imgs = vqa.getImgs()
-anns = vqa.getAnns(imgs=imgs)
+#imgs = vqa.getImgs()
+#anns = vqa.getAnns(imgs=imgs)
 
 def extract_vocab(iterable, top_k=None, start=0):
     """ Turns an iterable of list of tokens into a vocabulary.
@@ -35,17 +36,23 @@ def extract_vocab(iterable, top_k=None, start=0):
     return vocab
 
 def main():
-    questions = anns
-    answers = anns
+    questions = utils.path_for(train=True, question=True)
+    answers = utils.path_for(train=True, answer=True)
+
+    with open(questions, 'r') as fd:
+        questions = json.load(fd)
+    with open(answers, 'r') as fd:
+        answers = json.load(fd)
+
     questions = list(prepare_questions(questions))
     answers = list(prepare_answers(answers))
     question_vocab = extract_vocab(questions, start=1)
-    answer_vocab = extract_vocab(answers, top_k=5000) #what should top_k be here?
+    answer_vocab = extract_vocab(answers, top_k=config.max_answers) #what should top_k be here?
     vocabs = {
         'question': question_vocab,
         'answer': answer_vocab,
     }
-    with open("vocab.txt", 'w') as fd:
+    with open(config.vocabulary_path, 'w') as fd:
         json.dump(vocabs, fd)
     
     #v = list(encode_answers(a, answer_vocab) for a in answers)

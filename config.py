@@ -1,7 +1,7 @@
 
 # paths
-qa_path = 'vqa'  # directory containing the question and annotation jsons
-train_path = 'C:/Users/lajja/Documents/Fall2020/ML/vqa/processed-train/'  # directory of training images
+qa_path = 'annotations'  # directory containing the question and annotation jsons
+train_path = 'processed-train'  # directory of training images
 val_path = 'processed-val'  # directory of validation images
 test_path = 'processed-test'  # directory of test images
 preprocessed_path = './resnet-14x14.h5'  # path where preprocessed features are saved to and loaded from

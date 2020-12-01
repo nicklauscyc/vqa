@@ -45,17 +45,17 @@ def path_for(train=False, val=False, test=False, question=False, answer=False):
     assert question + answer == 1
     assert not (test and answer), 'loading answers from test split not supported'  # if you want to eval on test, you need to implement loading of a VQA Dataset without given answers yourself
     if train:
-        split = 'train2014'
+        split = 'train.json'
     elif val:
-        split = 'val2014'
+        split = 'val.json'
     else:
-        split = 'test2015'
-    if question:
-        fmt = '{0}_{1}_{2}_questions.json'
-    else:
-        fmt = '{1}_{2}_annotations.json'
-    s = fmt.format(config.task, config.dataset, split)
-    return os.path.join(config.qa_path, s)
+        split = 'test.json'
+    #if question:
+    #    fmt = '{0}_{1}_{2}_questions.json'
+   # else:
+    #    fmt = '{1}_{2}_annotations.json'
+   # s = fmt.format(config.task, config.dataset, split)
+    return os.path.join(config.qa_path, split)
 
 
 class Tracker:

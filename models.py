@@ -4,6 +4,65 @@ import torch.nn.functional as F
 import torch.nn.init as init
 from torch.nn.utils.rnn import pack_padded_sequence
 
+class Net(nn.Module):
+    """ Re-implementation of ``Show, Ask, Attend, and Answer: A Strong Baseline For Visual Question Answering'' [0]
+    [0]: https://arxiv.org/abs/1704.03162
+    """
+
+    def __init__(self, embedding_tokens):
+        super(Net, self).__init__()
+        question_features = 1024
+        vision_features = config.output_features
+        glimpses = 2
+
+        self.text = TextProcessor(
+            embedding_tokens=embedding_tokens,
+            embedding_features=300,
+            lstm_features=question_features,
+            drop=0.5,
+        )
+        self.attention = Attention(
+            v_features=vision_features,
+            q_features=question_features,
+            mid_features=512,
+            glimpses=2,
+            drop=0.5,
+        )
+        self.classifier = Classifier(
+            in_features=glimpses * vision_features + question_features,
+            mid_features=1024,
+            out_features=config.max_answers,
+            drop=0.5,
+        )
+
+        for m in self.modules():
+            if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
+                init.xavier_uniform(m.weight)
+                if m.bias is not None:
+                    m.bias.data.zero_()
+
+    def forward(self, v, q, q_len):
+        q = self.text(q, list(q_len.data))
+
+        v = v / (v.norm(p=2, dim=1, keepdim=True).expand_as(v) + 1e-8)
+        a = self.attention(v, q)
+        v = apply_attention(v, a)
+
+        combined = torch.cat([v, q], dim=1)
+        answer = self.classifier(combined)
+        return answer
+
+
+class Classifier(nn.Sequential):
+    def __init__(self, in_features, mid_features, out_features, drop=0.0):
+        super(Classifier, self).__init__()
+        self.add_module('drop1', nn.Dropout(drop))
+        self.add_module('lin1', nn.Linear(in_features, mid_features))
+        self.add_module('relu', nn.ReLU())
+        self.add_module('drop2', nn.Dropout(drop))
+        self.add_module('lin2', nn.Linear(mid_features, out_features))
+
+
 class LSTM(nn.Module):
     def __init__(self, embedding_tokens, embedding_features, lstm_features, drop = 0.0):
         super(LSTM, self).__init__()
