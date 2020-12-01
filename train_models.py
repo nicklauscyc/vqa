@@ -6,58 +6,24 @@ import json
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as data
 from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
 from tqdm import tqdm
 
-import vqa_classes
-import models
-import json_access
+import config
+import data
+import model
+import utils
 
-epochs = 50
-batch_size = 128
-initial_lr = 1e-3  # default Adam lr
-lr_halflife = 50000  # in iterations
-data_workers = 8
-lstm_features = 1024
-embedding_features = 300
-
-split = 'train'
-annFile='Annotations/%s.json'%(split)
-imgDir = 'train'
-
-# initialize VQA api for QA annotations
-vqa=json_access.VQA(annFile)
-
-imgs = vqa.getImgs()
-anns = vqa.getAnns(imgs=imgs)
-
-question_json = anns
-answer_json = anns
-vocab_path = "vocab.txt"
-
-def collate_fn(batch):
-    # put question lengths in descending order so that we can use packed sequences later
-    batch.sort(key=lambda x: x[-1], reverse=True)
-    return data.dataloader.default_collate(batch)
-
-train_split = vqa_classes.VQA(anns,anns,vocab_path)
-train_loader = torch.utils.data.DataLoader(train_split, batch_size = batch_size, shuffle = True, pin_memory = True, num_workers = data_workers, collate_fn = collate_fn)
-
-num_tokens = train_loader.dataset.num_tokens
-#open questions file from json dictionary
-#create tensor dataset 
-#pass into DataLoader
-
-train_model = lstm_model.LSTM(num_tokens, embedding_features, lstm_features, drop = 0.5)
 
 def update_learning_rate(optimizer, iteration):
     lr = config.initial_lr * 0.5**(float(iteration) / config.lr_halflife)
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+
 total_iterations = 0
+
 
 def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
     """ Run an epoch over the given loader """
@@ -162,4 +128,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
