@@ -9,4 +9,3 @@ transform = transforms.Compose(
      
 dataset = datasets.ImageFolder(path, transform=transform)
 
-https://medium.com/secure-and-private-ai-writing-challenge/loading-image-using-pytorch-c2e2dcce6ef2
