@@ -5,5 +5,9 @@ train/*
 val/*
 compressed-data/*
 data/*
+processed-test/*
+processed-train/*
+processed-val/*
+data_tutorial/*
 
 
