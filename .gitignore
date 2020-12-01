@@ -1,5 +1,4 @@
-# ignoring huge data set folders #
-##################################
+
 test/*
 train/*
 val/*
@@ -19,3 +18,11 @@ data/*
 
 __pycache__
 *.vscode/*
+=======
+# ignoring huge data set folders #
+##################################
+
+compressed-data/*
+data_tutorial/*
+
+
