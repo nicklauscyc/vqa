@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim 
 
 
 # compose together multiple different transformations
@@ -35,27 +36,11 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=4,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
            
-           
-  '''  
-def imshow(img):
-    img = img / 2 + 0.5     # unnormalize
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
-
-
-# get some random training images
-dataiter = iter(trainloader)
-images, labels = dataiter.next()
-
-# show images
-imshow(torchvision.utils.make_grid(images))
-print(' '.join('%5s' % classes[labels[j]] for j in range(4)))   
-'''
 
 #create the neural net 
 #Conv2d, first param is the number of in-channels (in our case 3 for RGB), second param is the number of out-channels, third is kernel size 
 #Max Pool applies 2D max pooling over an input signal composes of several input planes...first param is kernel size, second is stride)
+# nn.Linear applies a linear transformation to the incoming data, first param number of in channels, second is number of out channels
 
 class Net(nn.Module):
     def __init__(self):
@@ -78,4 +63,8 @@ class Net(nn.Module):
 
 
 net = Net()
+
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     
