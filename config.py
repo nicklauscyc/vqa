@@ -11,7 +11,7 @@ task = 'OpenEnded'
 dataset = 'vqa'
 
 # preprocess config
-preprocess_batch_size = 32
+preprocess_batch_size = 8
 image_size = 448  # scale shorter end of image to this size and centre crop
 output_size = image_size // 32  # size of the feature maps after processing through a network
 output_features = 2048  # number of feature maps thereof
