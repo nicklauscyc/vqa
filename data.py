@@ -8,6 +8,7 @@ import config
 import utils
 import json
 import re
+import h5py
 
 #adapted from: https://github.com/Cyanogenoid/pytorch-vqa/blob/master/data.py
 
@@ -53,7 +54,7 @@ class VQA(data.Dataset):
             answers_json = json.load(fd)
         with open(config.vocabulary_path, 'r') as fd:
             vocab_json = json.load(fd)
-        self._check_integrity(questions_json, answers_json)
+        #self._check_integrity(questions_json, answers_json)
 
         # vocab
         self.vocab = vocab_json
@@ -69,12 +70,14 @@ class VQA(data.Dataset):
         # v
         self.image_features_path = image_features_path
         self.pic_id_to_index = self._create_pic_id_to_index()
-        self.pic_ids = [q['image_id'] for q in questions_json['questions']]
+        self.pic_ids = [q['image'] for q in questions_json]
 
         # only use questions that have at least one answer?
         self.answerable_only = answerable_only
         if self.answerable_only:
             self.answerable = self._find_answerable()
+        
+        self.num_tokens = len(self.question_index) + 1  # add 1 for unknown token at index 0
     
     def max_question_length(self):
     #get max question length
@@ -82,9 +85,9 @@ class VQA(data.Dataset):
             self._max_length = max(map(len, self.questions))
         return self._max_length
     
-    def num_tokens(self):
+    #def num_tokens(self):
     #get no. of question 'tokens'
-        return len(self.question_index) + 1  # add 1 for unknown token at index 0
+    #    return len(self.question_index) + 1  # add 1 for unknown token at index 0
 
     
     def _create_pic_id_to_index(self):
@@ -96,7 +99,7 @@ class VQA(data.Dataset):
 
     def _check_integrity(self, questions, answers):
         """ Verify that we are using the correct data """
-        qa_pairs = list(zip(questions['questions'], answers['annotations']))
+        qa_pairs = list(zip(questions, answers))
         assert all(q['question_id'] == a['question_id'] for q, a in qa_pairs), 'Questions not aligned with answers'
         assert all(q['image_id'] == a['image_id'] for q, a in qa_pairs), 'Image id of question and answer don\'t match'
         assert questions['data_type'] == answers['data_type'], 'Mismatched data types'
@@ -113,16 +116,16 @@ class VQA(data.Dataset):
         return answerable
 
 
-    def encode_question(self, questions):
+    def _encode_question(self, question):
         #converts question into vector of indices and question length
         #max_length = max(map(len, questions))
-        vec = torch.zeros(self.max_question_length).long()
+        vec = torch.zeros(max(map(len, self.questions))).long()
         for i, token in enumerate(question):
             index = self.question_index.get(token, 0)
             vec[i] = index
         return vec, len(question)
 
-    def encode_answers(self, answers):
+    def _encode_answers(self, answers):
         #converts answer into vectors
         vec = torch.zeros(len(self.answer_index))
         for answer in answers:

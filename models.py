@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 from torch.nn.utils.rnn import pack_padded_sequence
+import config
 
 class Net(nn.Module):
     """ Re-implementation of ``Show, Ask, Attend, and Answer: A Strong Baseline For Visual Question Answering'' [0]
@@ -21,13 +22,13 @@ class Net(nn.Module):
             lstm_features=question_features,
             drop=0.5,
         )
-        self.attention = Attention(
-            v_features=vision_features,
-            q_features=question_features,
-            mid_features=512,
-            glimpses=2,
-            drop=0.5,
-        )
+        #self.attention = Attention(
+        #    v_features=vision_features,
+        #    q_features=question_features,
+       #     mid_features=512,
+        #    glimpses=2,
+       #     drop=0.5,
+       # )
         self.classifier = Classifier(
             in_features=glimpses * vision_features + question_features,
             mid_features=1024,
@@ -63,9 +64,9 @@ class Classifier(nn.Sequential):
         self.add_module('lin2', nn.Linear(mid_features, out_features))
 
 
-class LSTM(nn.Module):
+class TextProcessor(nn.Module):
     def __init__(self, embedding_tokens, embedding_features, lstm_features, drop = 0.0):
-        super(LSTM, self).__init__()
+        super(TextProcessor, self).__init__()
 
         self.embedding = nn.Embedding(embedding_tokens, embedding_features, padding_idx=0) #create lookup table to store embeddings of vocabulary
         #embedding_tokens = size of list of encoded questions
