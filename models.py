@@ -46,8 +46,8 @@ class Net(nn.Module):
         q = self.text(q, list(q_len.data))
 
         v = v / (v.norm(p=2, dim=1, keepdim=True).expand_as(v) + 1e-8)
-        a = self.attention(v, q)
-        v = apply_attention(v, a)
+        #a = self.attention(v, q)
+        #v = apply_attention(v, a)
 
         combined = torch.cat([v, q], dim=1)
         answer = self.classifier(combined)
