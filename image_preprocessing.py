@@ -16,7 +16,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.model = caffe_resnet.resnet152(pretrained=True)
-
+ 
         def save_output(module, input, output):
             self.buffer = output
         self.model.layer4.register_forward_hook(save_output)
@@ -60,7 +60,7 @@ def main():
 
         i = j = 0
         for ids, imgs in tqdm(loader):
-            imgs = Variable(imgs.cuda(device=None, non_blocking=False), volatile=True)
+            imgs = Variable(imgs).cuda(device=None, non_blocking=False), volatile=True)
             out = net(imgs)
 
             j = i + imgs.size(0)
