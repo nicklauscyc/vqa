@@ -95,6 +95,7 @@ class VQA(data.Dataset):
         with h5py.File(self.image_features_path, 'r') as features_file:
             pic_ids = features_file['ids'][()]
         pic_id_to_index = {id: i for i, id in enumerate(pic_ids)}
+        #print(pic_id_to_index)
         return pic_id_to_index
 
     def _check_integrity(self, questions, answers):
@@ -141,6 +142,7 @@ class VQA(data.Dataset):
             # forks for multiple works, every child would use the same file object and fail
             # Having multiple readers using different file objects is fine though, so we just init in here.
             self.features_file = h5py.File(self.image_features_path, 'r')
+        #print(image_id)
         index = self.pic_id_to_index[image_id]
         dataset = self.features_file['features']
         img = dataset[index].astype('float32')
@@ -154,6 +156,8 @@ class VQA(data.Dataset):
         q, q_length = self.questions[item]
         a = self.answers[item]
         image_id = self.pic_ids[item]
+        end = image_id[-11:]
+        image_id = int(end[:-4])
         v = self._load_image(image_id)
         # since batches are re-ordered for PackedSequence's, the original question order is lost
         # we return `item` so that the order of (v, q, a) triples can be restored if desired

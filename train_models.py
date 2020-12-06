@@ -75,7 +75,7 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
             accs.append(acc.view(-1))
             idxs.append(idx.view(-1).clone())
 
-        loss_tracker.append(loss.data[0])
+        loss_tracker.append(loss.data.item())
         # acc_tracker.append(acc.mean())
         for a in acc:
             acc_tracker.append(a.item())
