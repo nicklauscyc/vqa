@@ -9,7 +9,6 @@ import torch.nn.functional as F
 import config
 import data
 import utils
-import CNN_arch
 
 from torch.nn import Linear, Sequential, Conv2d, MaxPool2d, BatchNorm2d, ReLU
 
