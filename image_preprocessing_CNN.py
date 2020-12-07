@@ -57,7 +57,7 @@ def create_vqa_loader(*paths):
 def main():
     cudnn.benchmark = True
 
-    net = Net()#.cuda()
+    net = Net().cuda()
     net.eval()
 
     loader = create_vqa_loader(config.train_path, config.val_path)
@@ -72,7 +72,7 @@ def main():
 
         i = j = 0
         for ids, imgs in tqdm(loader):
-            imgs = Variable(imgs)#.cuda(device=None, non_blocking=False), volatile=True)
+            imgs = Variable(imgs).cuda(device=None, non_blocking=False), volatile=True)
             out = net(imgs)
 
             j = i + imgs.size(0)
