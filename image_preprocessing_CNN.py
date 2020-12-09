@@ -71,7 +71,7 @@ def main():
 
         i = j = 0
         for ids, imgs in tqdm(loader):
-            imgs = Variable(imgs).cuda(device=None, non_blocking=False), volatile=True)
+            imgs = Variable(imgs).cuda(device=None, non_blocking=True)
             out = net(imgs)
 
             j = i + imgs.size(0)
