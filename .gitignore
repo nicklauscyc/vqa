@@ -1,10 +1,8 @@
 
+# ignore images
 test/*
 train/*
 val/*
-processed-test/*
-processed-train/*
-processed-val/*
 
 seam-carve-train/*
 
@@ -12,13 +10,19 @@ other-data/*
 compressed-data/*
 data/*
 
+# ignore h5 file
+*h5
 
-# ignore pycacache
+# ignore logs
+./logs/*
+
+# ignore pycache
 *.pyc
+__pycache__*
 
-__pycache__
+# ignore vscode bs
 *.vscode/*
-=======
+
 # ignoring huge data set folders #
 ##################################
 

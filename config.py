@@ -1,9 +1,9 @@
 
 # paths
 qa_path = 'annotations'  # directory containing the question and annotation jsons
-train_path = 'processed-train'  # directory of training images
-val_path = 'processed-val'  # directory of validation images
-test_path = 'processed-test'  # directory of test images
+train_path = 'train'  # directory of training images
+val_path = 'val'  # directory of validation images
+test_path = 'test'  # directory of test images
 preprocessed_path = './resnet-14x14.h5'  # path where preprocessed features are saved to and loaded from
 vocabulary_path = 'vocab.json'  # path where the used vocabularies for question and answers are saved to
 
