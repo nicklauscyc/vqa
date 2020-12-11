@@ -45,14 +45,16 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
 
     log_softmax = nn.LogSoftmax().cuda()
     for v, q, a, idx, q_len in tq:
-        var_params = {
-            'volatile': not train,
-            'requires_grad': False,
-        }
-        v = Variable(v.cuda(async=True), **var_params)
-        q = Variable(q.cuda(async=True), **var_params)
-        a = Variable(a.cuda(async=True), **var_params)
-        q_len = Variable(q_len.cuda(async=True), **var_params)
+        requires_grad = False;
+        v = Variable(v, requires_grad)
+        q = Variable(q, requires_grad)
+        a = Variable(a, requires_grad)
+        q_len = Variable(q_len, requires_grad)
+
+        v = v.cuda()
+        q = q.cuda()
+        a = a.cuda()
+        q_len = q_len.cuda()
 
         out = net(v, q, q_len)
         nll = -log_softmax(out)
@@ -90,11 +92,21 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
 
 
 def main():
+    from datetime import datetime
+
+    # this has been changed to run jupyter
+    #
+    # non jupyter ##############################################################
     if len(sys.argv) > 1:
         name = ' '.join(sys.argv[1:])
     else:
-        from datetime import datetime
-        name = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+        name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    ############################################################################
+
+
+    # remove line below if not running on jupyter
+    name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
     target_name = os.path.join('logs', '{}.pth'.format(name))
     print('will save to {}'.format(target_name))
 

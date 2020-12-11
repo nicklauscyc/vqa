@@ -60,11 +60,6 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
         a = a.cuda()
         q_len = q_len.cuda()
 
-        #print("device of", "v", v.device)
-        #print("device of", "q", q.device)
-        #print("device of", "a", a.device)
-        #print("device of", "q_len", q_len.device)
-
         out = net(v, q, q_len)
         nll = -log_softmax(out)
         loss = (nll * a / 10).sum(dim=1).mean()
