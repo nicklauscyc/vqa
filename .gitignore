@@ -14,8 +14,10 @@ processed-train/
 processed-train2/
 processed-val/
 processed-val2/
+
 # ignore h5 file
 *h5
+resnet-14x14.h5
 
 # ignore logs
 ./logs/*
