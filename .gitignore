@@ -9,7 +9,11 @@ seam-carve-train/*
 other-data/*
 compressed-data/*
 data/*
-
+processed-test/
+processed-train/
+processed-train2/
+processed-val/
+processed-val2/
 # ignore h5 file
 *h5
 
