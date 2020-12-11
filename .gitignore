@@ -10,6 +10,9 @@ other-data/*
 compressed-data/*
 data/*
 
+# ignore h5 file
+*h5
+
 # ignore logs
 ./logs/*
 
