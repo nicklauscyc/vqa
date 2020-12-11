@@ -10,6 +10,8 @@ other-data/*
 compressed-data/*
 data/*
 
+# ignore logs
+./logs/*
 
 # ignore pycache
 *.pyc

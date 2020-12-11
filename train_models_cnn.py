@@ -26,9 +26,12 @@ def update_learning_rate(optimizer, iteration):
 
 total_iterations = 0
 
+# set up cuda
+cuda = torch.device('cuda')
 
 def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
     """ Run an epoch over the given loader """
+
     if train:
         net.train()
         tracker_class, tracker_params = tracker.MovingMeanMonitor, {'momentum': 0.99}
@@ -39,20 +42,28 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
         idxs = []
         accs = []
 
+    # tq is the progress bar
     tq = tqdm(loader, desc='{} E{:03d}'.format(prefix, epoch), ncols=0)
     loss_tracker = tracker.track('{}_loss'.format(prefix), tracker_class(**tracker_params))
     acc_tracker = tracker.track('{}_acc'.format(prefix), tracker_class(**tracker_params))
 
     log_softmax = nn.LogSoftmax().cuda()
     for v, q, a, idx, q_len in tq:
-        var_params = {
-            'volatile': not train,
-            'requires_grad': False,
-        }
-        v = Variable(v.cuda(async=True), **var_params)
-        q = Variable(q.cuda(async=True), **var_params)
-        a = Variable(a.cuda(async=True), **var_params)
-        q_len = Variable(q_len.cuda(async=True), **var_params)
+        requires_grad = False;
+        v = Variable(v, requires_grad)
+        q = Variable(q, requires_grad)
+        a = Variable(a, requires_grad)
+        q_len = Variable(q_len, requires_grad)
+
+        v = v.cuda()
+        q = q.cuda()
+        a = a.cuda()
+        q_len = q_len.cuda()
+
+        #print("device of", "v", v.device)
+        #print("device of", "q", q.device)
+        #print("device of", "a", a.device)
+        #print("device of", "q_len", q_len.device)
 
         out = net(v, q, q_len)
         nll = -log_softmax(out)
@@ -90,11 +101,21 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
 
 
 def main():
+    from datetime import datetime
+
+    # this has been changed to run jupyter
+    #
+    # non jupyter ##############################################################
     if len(sys.argv) > 1:
         name = ' '.join(sys.argv[1:])
     else:
-        from datetime import datetime
-        name = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+        name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    ############################################################################
+
+
+    # remove line below if not running on jupyter
+    name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
     target_name = os.path.join('logs', '{}.pth'.format(name))
     print('will save to {}'.format(target_name))
 
