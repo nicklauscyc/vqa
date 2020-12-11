@@ -1,21 +1,36 @@
-# ignoring huge data set folders #
-##################################
+
+# ignore images
 test/*
 train/*
 val/*
-processed-test/*
-processed-train/*
-processed-val/*
 
 seam-carve-train/*
 
 other-data/*
 compressed-data/*
 data/*
+processed-test/
+processed-train/
+processed-train2/
+processed-val/
+processed-val2/
+# ignore h5 file
+*h5
 
+# ignore logs
+./logs/*
 
-# ignore pycacache
+# ignore pycache
 *.pyc
+__pycache__*
 
-__pycache__
+# ignore vscode bs
 *.vscode/*
+
+# ignoring huge data set folders #
+##################################
+
+compressed-data/*
+data_tutorial/*
+
+
