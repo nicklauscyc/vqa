@@ -15,7 +15,7 @@ import resnet as caffe_resnet
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.model = caffe_resnet.resnet18(pretrained=True)
+        self.model = caffe_resnet.resnet50(pretrained=False)
 
         def save_output(module, input, output):
             self.buffer = output
