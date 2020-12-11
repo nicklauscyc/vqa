@@ -21,6 +21,7 @@ resnet-14x14.h5
 
 # ignore logs
 ./logs/*
+./old-logs/*
 
 # ignore pycache
 *.pyc
