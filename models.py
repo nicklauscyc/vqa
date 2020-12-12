@@ -43,6 +43,10 @@ class Net(nn.Module):
                     m.bias.data.zero_()
 
     def forward(self, v, q, q_len):
+        #TODO remove this for models
+        #v = v.unsqueeze(2)
+        #v = v.unsqueeze(3)
+
         q = self.text(q, list(q_len.data))
         v = v / (v.norm(p=2, dim=1, keepdim=True).expand_as(v) + 1e-8)
         a = self.attention(v, q)
@@ -68,11 +72,11 @@ class TextProcessor(nn.Module):
 
         self.embedding = nn.Embedding(embedding_tokens, embedding_features, padding_idx=0) #create lookup table to store embeddings of vocabulary
         #embedding_tokens = size of list of encoded questions
-        #embedding_features = size of each question vector 
+        #embedding_features = size of each question vector
         #padding_idx = pads output with embedding vector
 
-        self.drop = nn.Dropout(drop) #During training, randomly zeroes some of the elements of the input tensor with 
-        #probability p using samples from a Bernoulli distribution. 
+        self.drop = nn.Dropout(drop) #During training, randomly zeroes some of the elements of the input tensor with
+        #probability p using samples from a Bernoulli distribution.
         #Each channel will be zeroed out independently on every forward call.
 
         self.tanh = nn.Tanh()
@@ -91,11 +95,11 @@ class TextProcessor(nn.Module):
 
         self.lstm.bias_ih_l0.data.zero_() #(see above) -> shape = (4*hidden_size)
         self.lstm.bias_hh_l0.data.zero_() #(see above) -> shape = (4*hidden_size)
-        
+
         #here we initialize weights
-        init.xavier_uniform(self.embedding.weight) #embedding.weight gives the learnable weights of the module of 
+        init.xavier_uniform(self.embedding.weight) #embedding.weight gives the learnable weights of the module of
                                                    #shape (num_embeddings, embedding_dim) initialized from N(0,1)
-        #Fills the input Tensor with values according to the method described in Understanding the difficulty of 
+        #Fills the input Tensor with values according to the method described in Understanding the difficulty of
         #training deep feedforward neural networks - Glorot, X. & Bengio, Y. (2010), using a uniform distribution
 
     def _init_lstm(self, weight):
@@ -134,6 +138,8 @@ def apply_attention(input, attention):
     glimpses = attention.size(1)
 
     # flatten the spatial dims into the third dim, since we don't need to care about how they are arranged
+    #
+    # if running
     input = input.view(n, 1, c, -1) # [n, 1, c, s]
     attention = attention.view(n, glimpses, -1)
     attention = F.softmax(attention, dim=-1).unsqueeze(2) # [n, g, 1, s]
