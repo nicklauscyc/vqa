@@ -1,3 +1,5 @@
+# this trains a resnet with no attention, regardless of the size
+
 import sys
 import os.path
 import math
@@ -16,6 +18,7 @@ import modelNoAttention
 import utils
 
 import h5py
+
 
 
 def update_learning_rate(optimizer, iteration):

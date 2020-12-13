@@ -12,8 +12,6 @@ import argparse
 from numba import jit
 from scipy import ndimage as ndi
 
-path = 'C:/Users/lajja/Documents/Fall2020/ML/vqa/test/test/'
-#train_img_len = len(os.listdir(path))
 
 # for efficiency reasons in seam_carving.py
 IN_DIR = None
@@ -43,7 +41,7 @@ def processImages(width, imgDir, outputDir, seam_carve=True):
 
         # downsize the image
         im = seam_carving.resize(im, width=DOWNSIZE_WIDTH)
-        
+
         # get image resolution
         h, w = im.shape[:2]
 
@@ -78,7 +76,7 @@ def processImages(width, imgDir, outputDir, seam_carve=True):
         now = time.time()
         if count % 50 == 0:
             print('   processed image', full_path, 'in', int(now-prev), 's')
-           
+
             print('-- time elapse:', int(prev-start), 's, processed:', count,
                 'average time:', int((prev-start)/count), 's', int(count/len(allImg)*100), 'percent complete')
         prev = now
@@ -101,7 +99,7 @@ if __name__ == '__main__':
         processImages(WIDTH, IN_DIR, OUT_DIR)
     else:
         processImages(WIDTH, IN_DIR, OUT_DIR, seam_carve=False)
-        
+
 
 
 
