@@ -3,6 +3,7 @@
 test/*
 train/*
 val/*
+newtrain/*
 
 seam-carve-train/*
 
