@@ -4,6 +4,9 @@ test/*
 train/*
 val/*
 newtrain/*
+old-train/
+old-test/
+old-val/
 
 seam-carve-train/*
 
