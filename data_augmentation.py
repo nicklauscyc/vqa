@@ -83,6 +83,82 @@ def processImages(width, imgDir, outputDir, seam_carve=True):
                 'average time:', int((prev-start)/count), 's', int(count/len(allImg)*100), 'percent complete')
         prev = now
 
+def blur(inDir, outDir, inAnnotation, outAnnotation):
+    ''' rotates each image by 90 degrees, and updates the annotations as well'''
+
+    count = 0
+    start = time.time()
+    prev = time.time()
+
+    allImg = sorted(os.listdir(inDir))
+
+    # parse dictionary
+    rawFile = open(inAnnotation + '/' + TRAIN_ANNOTATION)
+    data = json.load(rawFile)
+
+    # parse images
+    skip = 0
+
+    newAnnotation = []
+    count = 0
+
+    for i in range(len(allImg)):
+
+        # index into the correct part
+        filename = allImg[i]
+        annotation = data[i-skip]
+
+        # generate full path to the image
+        fullPath = inDir + '/' + filename
+
+        # skip missing annotations
+        if annotation['image'] != filename:
+            assert False
+            print('skipped', annotation['image'], filename)
+            skip += 1
+            continue
+
+        # read the image
+        im = cv2.imread(fullPath)
+        print(fullPath)
+
+        # get rotation matrix
+        rows, cols = im.shape[0], im.shape[1]
+        print(rows, cols)
+        blur = cv2.GaussianBlur(im,(5,5),0)
+
+        # generate new file names
+        f = filename[:-4] + '-noblur.jpg'
+        fb = filename[:-4] + '-blur.jpg'
+
+        # construct new out filenames
+        fp = outDir + '/' + f
+        fpb = outDir + '/' + fb
+
+        # write to new directory
+        cv2.imwrite(fp, im)
+        cv2.imwrite(fpb, blur)
+
+        # create deep copy of dictionary
+        data0 = copy.deepcopy(annotation)
+        datab = copy.deepcopy(annotation)
+
+        # change the image name
+        data0['image'] = f
+        datab['image'] = fb
+
+        # append to output list
+        newAnnotation.append(data0)
+        newAnnotation.append(datab)
+
+        print(filename, annotation['image'])
+        #full_path = inDir + filename
+
+
+    # write to new json file
+    with open(outAnnotation + '/' + TRAIN_ANNOTATION, 'w') as fout:
+        json.dump(newAnnotation, fout, indent=2)
+
 def rotate(inDir, outDir, inAnnotation, outAnnotation):
     ''' rotates each image by 90 degrees, and updates the annotations as well'''
 
@@ -195,6 +271,8 @@ if __name__ == '__main__':
     IN_ANN = args['ia']
     OUT_ANN = args['oa']
     rotate(IN_DIR, OUT_DIR, IN_ANN, OUT_ANN)
+
+    blur('newtrain', 'newtrainb', 'newannotations', 'newannotationsb')
 
 
 
