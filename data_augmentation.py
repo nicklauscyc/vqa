@@ -12,7 +12,7 @@ import argparse
 from numba import jit
 from scipy import ndimage as ndi
 import json
-
+import copy
 
 # for efficiency reasons in seam_carving.py
 IN_DIR = None
@@ -100,6 +100,7 @@ def rotate(inDir, outDir, inAnnotation, outAnnotation):
     skip = 0
 
     newAnnotation = []
+    count = 0
 
     for i in range(len(allImg)):
 
@@ -128,10 +129,10 @@ def rotate(inDir, outDir, inAnnotation, outAnnotation):
         im270 = cv2.warpAffine(im180, M, (cols, rows))
 
         # generate new file names
-        f = filename + '-000d'
-        f90 = filename + '-090d'
-        f180 = filename + '-180d'
-        f270 = filename + '-270d'
+        f = filename[:-4] + '-000d.jpg'
+        f90 = filename[:-4] + '-090d.jpg'
+        f180 = filename[:-4] + '-180d.jpg'
+        f270 = filename[:-4] + '-270d.jpg'
 
         # construct new out filenames
         fp = outDir + '/' + f
@@ -145,8 +146,33 @@ def rotate(inDir, outDir, inAnnotation, outAnnotation):
         cv2.imwrite(fp180, im180)
         cv2.imwrite(fp270, im270)
 
+        # create deep copy of dictionary
+        data0 = copy.deepcopy(annotation)
+        data90 = copy.deepcopy(annotation)
+        data180 = copy.deepcopy(annotation)
+        data270 = copy.deepcopy(annotation)
+
+        # change the image name
+        data0['image'] = f
+        data90['image'] = f90
+        data180['image'] = f180
+        data270['image'] = f270
+
+        # append to output list
+        newAnnotation.append(data0)
+        newAnnotation.append(data90)
+        newAnnotation.append(data180)
+        newAnnotation.append(data270)
+
         print(filename, annotation['image'])
         #full_path = inDir + filename
+        count += 1
+        if count > 100:break
+
+
+    # write to new json file
+    with open(outAnnotation + '/' + TRAIN_ANNOTATION, 'w') as fout:
+        json.dump(newAnnotation, fout, indent=2)
 
 
 if __name__ == '__main__':
