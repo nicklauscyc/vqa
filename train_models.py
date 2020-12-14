@@ -104,7 +104,7 @@ def main():
     val_loader = data.get_loader(val=True)
 
     net = nn.DataParallel(models.Net(train_loader.dataset.num_tokens)).cuda() #change made here
-    optimizer = optim.Adam([p for p in net.parameters() if p.requires_grad])
+    optimizer = optim.Adam([p for p in net.parameters() if p.requires_grad],weight_decay=1)
 
     tracker = utils.Tracker()
     config_as_dict = {k: v for k, v in vars(config).items() if not k.startswith('__')}
