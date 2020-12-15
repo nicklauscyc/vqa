@@ -86,6 +86,7 @@ def processImages(width, imgDir, outputDir, seam_carve=True):
 def blur(inDir, outDir, inAnnotation, outAnnotation):
     ''' rotates each image by 90 degrees, and updates the annotations as well'''
 
+    print('blur function')
     count = 0
     start = time.time()
     prev = time.time()
@@ -113,8 +114,8 @@ def blur(inDir, outDir, inAnnotation, outAnnotation):
 
         # skip missing annotations
         if annotation['image'] != filename:
-            assert False
             print('skipped', annotation['image'], filename)
+            assert False
             skip += 1
             continue
 
@@ -243,7 +244,6 @@ def rotate(inDir, outDir, inAnnotation, outAnnotation):
         print(filename, annotation['image'])
         #full_path = inDir + filename
         count += 1
-        if count > 100:break
 
 
     # write to new json file
