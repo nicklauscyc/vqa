@@ -3,6 +3,7 @@ Visual question and answer
 
 ## Running the code
 This model is based off https://github.com/Cyanogenoid/pytorch-vqa
+Before running the code please download the relevant train, validation and test data from https://vizwiz.org/tasks-and-datasets/vqa/
 Each section below tells you which scripts to run depending on whether the results for the Resnet-18 or
 CNN are desired
 
