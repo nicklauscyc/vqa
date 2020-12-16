@@ -134,8 +134,8 @@ class Attention(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, v, q):
-        #v = v.unsqueeze(2)
-        #v = v.unsqueeze(3)
+        v = v.unsqueeze(2)
+        v = v.unsqueeze(3)
         v = self.v_conv(self.drop(v))
         q = self.q_lin(self.drop(q))
         q = tile_2d_over_nd(q, v)

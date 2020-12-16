@@ -16,6 +16,8 @@ class Net(nn.Module):
         vision_features = config.output_features
         glimpses = 2
 
+        print('vision features for attention:', vision_features)
+
         self.text = TextProcessor(
             embedding_tokens=embedding_tokens,
             embedding_features=300,
@@ -49,6 +51,7 @@ class Net(nn.Module):
 
         q = self.text(q, list(q_len.data))
         v = v / (v.norm(p=2, dim=1, keepdim=True).expand_as(v) + 1e-8)
+
         a = self.attention(v, q)
         v = apply_attention(v, a)
         combined = torch.cat([v, q], dim=1) #change this part?

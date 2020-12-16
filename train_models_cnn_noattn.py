@@ -1,5 +1,3 @@
-# this trains a resnet with no attention, regardless of the size
-
 import sys
 import os.path
 import math
@@ -20,7 +18,6 @@ import utils
 import h5py
 
 
-
 def update_learning_rate(optimizer, iteration):
     lr = config.initial_lr * 0.5**(float(iteration) / config.lr_halflife)
     for param_group in optimizer.param_groups:
@@ -29,9 +26,12 @@ def update_learning_rate(optimizer, iteration):
 
 total_iterations = 0
 
+# set up cuda
+cuda = torch.device('cuda')
 
 def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
     """ Run an epoch over the given loader """
+
     if train:
         net.train()
         tracker_class, tracker_params = tracker.MovingMeanMonitor, {'momentum': 0.99}
@@ -42,6 +42,7 @@ def run(net, loader, optimizer, tracker, train=False, prefix='', epoch=0):
         idxs = []
         accs = []
 
+    # tq is the progress bar
     tq = tqdm(loader, desc='{} E{:03d}'.format(prefix, epoch), ncols=0)
     loss_tracker = tracker.track('{}_loss'.format(prefix), tracker_class(**tracker_params))
     acc_tracker = tracker.track('{}_acc'.format(prefix), tracker_class(**tracker_params))
@@ -118,7 +119,7 @@ def main():
     train_loader = data.get_loader(train=True)
     val_loader = data.get_loader(val=True)
 
-    net = nn.DataParallel(models.Net(train_loader.dataset.num_tokens)).cuda() #change made here
+    net = nn.DataParallel(modelNoAttention.Net(train_loader.dataset.num_tokens)).cuda() #change made here
     optimizer = optim.Adam([p for p in net.parameters() if p.requires_grad], weight_decay=0.01)
 
     tracker = utils.Tracker()
