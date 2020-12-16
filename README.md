@@ -38,20 +38,20 @@ folders since they contain data way past the Github limit
 This model is based off https://github.com/Cyanogenoid/pytorch-vqa
 
 We run the scripts in the following order to achieve the best results
-
+```
 image_preprocessing_CNN.py
-
+```
 This extracts features from the image
-
+```
 preprocess-QA.py
-
+```
 This extracts features from the questions asked
-
+```
 train_models_cnn.py
-
+```
 This trains the model for 50 epochs with L2 regularization 0.0005
-
+```
 view-logs.py logs/<log name>
-
+```
 This prints out the results
 
